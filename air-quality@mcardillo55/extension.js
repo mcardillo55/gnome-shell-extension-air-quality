@@ -107,7 +107,7 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
             clow = 350.5
             ilow = 301
         }
-        return Math.ceil(coef * (pm25 - clow) + ilow);
+        return Math.round(coef * (pm25 - clow) + ilow);
     }
 
     load_json_async(url, params, fun) {
