@@ -23,6 +23,7 @@ const Gio = imports.gi.Gio;
 const GObject = imports.gi.GObject;
 const St = imports.gi.St;
 
+const Mainloop = imports.mainloop;
 const Lang = imports.lang;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -63,13 +64,15 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
     refresh_aqi() {
         log('Refresh AQI');
         let PURPLEAIRURL = "https://www.purpleair.com/json"
-        let PURPLEAIRID = "12345"
+        let INTERVAL = 600
 
         this.load_json_async(PURPLEAIRURL, {show: PURPLEAIRID}, function(json) {
             // grab the 10 minute pm2.5 average from the stats field
             let stats = JSON.parse(json.results[0].Stats)
             this._aqiLabel.text = this.calculate_aqi(stats.v1).toString()
         })
+
+        Mainloop.timeout_add_seconds(INTERVAL, this.refresh_aqi);
     }
 
     calculate_aqi(pm25) {
