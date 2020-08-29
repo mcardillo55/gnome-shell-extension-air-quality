@@ -34,13 +34,13 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
     _init() {
         super._init(0.0, `${Me.metadata.name} Indicator`, false)
 
-        this._aqi = new St.Label({
+        this._aqi = 250
+        this._aqiLabel = new St.Label({
             y_align: Clutter.ActorAlign.CENTER,
-            text: "250"
+            text: this._aqi.toString()
         });
-        //this.actor.add_child(icon);
 
-        this.actor.add_child(this._aqi);
+        this.actor.add_child(this._aqiLabel);
 
         this.menu.addAction('Preferences', this.menuAction, null);
     }
