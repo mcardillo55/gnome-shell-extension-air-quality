@@ -1,0 +1,8 @@
+{
+  "name": "Air Quality",
+  "description": "View local air quality in the top bar",
+  "uuid": "air-quality@mcardillo55",
+  "shell-version": [
+    "3.36"
+  ]
+}
