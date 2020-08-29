@@ -66,8 +66,9 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
         let PURPLEAIRID = "12345"
 
         this.load_json_async(PURPLEAIRURL, {show: PURPLEAIRID}, function(json) {
-            //log(JSON.stringify(json));
-            this._aqiLabel.text = this.calculate_aqi(json.results[0].PM2_5Value).toString()
+            // grab the 10 minute pm2.5 average from the stats field
+            let stats = JSON.parse(json.results[0].Stats)
+            this._aqiLabel.text = this.calculate_aqi(stats.v1).toString()
         })
     }
 
