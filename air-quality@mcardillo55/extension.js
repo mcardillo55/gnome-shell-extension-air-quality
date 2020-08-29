@@ -69,10 +69,28 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
         this.load_json_async(PURPLEAIRURL, {show: PURPLEAIRID}, function(json) {
             // grab the 10 minute pm2.5 average from the stats field
             let stats = JSON.parse(json.results[0].Stats)
-            this._aqiLabel.text = this.calculate_aqi(stats.v1).toString()
+            let aqi = this.calculate_aqi(stats.v1)
+            this._aqiLabel.text = aqi.toString();
+            this._aqiLabel.set_style_class_name(this.get_style(aqi));
         })
 
         Mainloop.timeout_add_seconds(INTERVAL, this.refresh_aqi);
+    }
+
+    get_style(aqi) {
+        if (aqi <= 50) {
+            return "good"
+        } else if (aqi <= 100) {
+            return "moderate"
+        } else if (aqi <= 150) {
+            return "unhealthy_sensitive"
+        } else if (aqi <= 200) {
+            return "unhealthy"
+        } else if (aqi <= 300) {
+            return "very_unhealthy"
+        } else if (aqi <= 500) {
+            return "hazardous"
+        }
     }
 
     calculate_aqi(pm25) {

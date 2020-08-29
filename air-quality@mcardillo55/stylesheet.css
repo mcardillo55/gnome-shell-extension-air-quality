@@ -1,1 +1,19 @@
 /* Add your custom extension styling here */
+.good{
+    color: lime;
+}
+.moderate{
+    color: yellow;
+}
+.unhealthy_sensitive{
+    color: orange;
+}
+.unhealthy{
+    color: red;
+}
+.very_unhealthy{
+    color: purple;
+}
+.hazardous{
+    color: maroon;
+}
