@@ -33,6 +33,8 @@ const PanelMenu = imports.ui.panelMenu;
 const Config = imports.misc.config;
 const SHELL_MINOR = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
 
+const AIRQUALITY_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.airquality';
+
 let _httpSession;
 
 var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
@@ -49,16 +51,21 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
         this.add_actor(this._aqiLabel);
 
         this.refresh_aqi = this.refresh_aqi.bind(this)
+        this.loadConfig = this.loadConfig.bind(this)
+        this._onPreferencesActivate = this._onPreferencesActivate.bind(this)
 
         this.menu.addAction('Update', this.refresh_aqi, null);
-        this.menu.addAction('Preferences', this.menuAction, null);
+        this.menu.addAction('Preferences', this._onPreferencesActivate, null);
 
         this.refresh_aqi();
-        
     }
 
     menuAction() {
         log('Menu item activated');
+    }
+
+    loadConfig() {
+        this.Settings = ExtensionUtils.getSettings(AIRQUALITY_SETTINGS_SCHEMA);
     }
 
     refresh_aqi() {
@@ -66,7 +73,9 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
         let PURPLEAIRURL = "https://www.purpleair.com/json"
         let INTERVAL = 600
 
-        this.load_json_async(PURPLEAIRURL, {show: PURPLEAIRID}, function(json) {
+        this.loadConfig();
+
+        this.load_json_async(PURPLEAIRURL, {show: this.Settings.get_string("current-sensor")}, function(json) {
             // grab the 10 minute pm2.5 average from the stats field
             let stats = JSON.parse(json.results[0].Stats)
             let aqi = this.calculate_aqi(stats.v1)
@@ -153,6 +162,19 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
             }
         }));
         return;
+    }
+
+    _onPreferencesActivate() {
+        this.menu.actor.hide();
+        if (typeof ExtensionUtils.openPrefs === 'function') {
+            ExtensionUtils.openPrefs();
+        } else {
+            Util.spawn([
+                "gnome-shell-extension-prefs",
+                Me.uuid
+            ]);
+        }
+        return 0;
     }
 }
 

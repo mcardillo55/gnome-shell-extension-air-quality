@@ -1,0 +1,9 @@
+<schemalist gettext-domain="gnome-shell-extension-airquality">
+    <schema id="org.gnome.shell.extensions.airquality" path="/org/gnome/shell/extensions/airquality/">
+    <key type="s" name="current-sensor">
+      <default>"0"</default>
+      <summary>Current Sensor ID</summary>
+      <description/>
+    </key>
+  </schema>
+</schemalist>
