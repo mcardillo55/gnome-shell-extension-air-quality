@@ -73,8 +73,7 @@ const AirQualityPrefsWidget = new GObject.Class({
             let iter = selection.get_selected()[2]
             let selected_id = this.liststore.get_value(iter, 2)
             this.setCurrentSensor(selected_id.toString())
-            log(selected_id)
-            log("Row activated!")
+
         }))
 
         this.Window.get_object("search-button").connect("clicked", Lang.bind(this, function() {

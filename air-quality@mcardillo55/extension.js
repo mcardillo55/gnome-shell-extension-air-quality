@@ -68,7 +68,6 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
     }
 
     refresh_aqi() {
-        log('Refresh AQI');
         let PURPLEAIRURL = "https://www.purpleair.com/json"
         let INTERVAL = 600
 
