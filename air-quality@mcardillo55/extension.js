@@ -54,7 +54,7 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
         this.loadConfig = this.loadConfig.bind(this)
         this._onPreferencesActivate = this._onPreferencesActivate.bind(this)
 
-        this.menu.addAction('Update', this.refresh_aqi, null);
+        this.menu.addAction('Update Now', this.refresh_aqi, null);
         this.menu.addAction('Preferences', this._onPreferencesActivate, null);
 
         this.refresh_aqi();
