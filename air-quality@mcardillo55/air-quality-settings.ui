@@ -2,6 +2,16 @@
 <!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
+  <object class="GtkMenu" id="search-menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+  </object>
+  <object class="GtkListStore" id="tree-liststore">
+    <columns>
+      <!-- column-name Location -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkBox" id="prefs-widget">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -108,6 +118,7 @@
           <object class="GtkTreeView" id="tree-treeview">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="model">tree-liststore</property>
             <child internal-child="selection">
               <object class="GtkTreeSelection"/>
             </child>
