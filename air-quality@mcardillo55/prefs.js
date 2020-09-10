@@ -61,12 +61,21 @@ const AirQualityPrefsWidget = new GObject.Class({
         column.add_attribute(renderer, "text", 1);
 
         this.currentSensor.connect("activate", Lang.bind(this, function() {
-            this.Settings.set_string("current-sensor", this.currentSensor.get_text())
+            this.setCurrentSensor(this.currentSensor.get_text())
         }));
 
         this.loadConfig();
 
         this.currentSensor.set_text(this.Settings.get_string("current-sensor"))
+
+        this.treeview.connect("row-activated", Lang.bind(this, function() {
+            let selection = this.treeview.get_selection()
+            let iter = selection.get_selected()[2]
+            let selected_id = this.liststore.get_value(iter, 2)
+            this.setCurrentSensor(selected_id.toString())
+            log(selected_id)
+            log("Row activated!")
+        }))
 
         this.Window.get_object("search-button").connect("clicked", Lang.bind(this, function() {
             this.clearSearchMenu();
@@ -110,6 +119,11 @@ const AirQualityPrefsWidget = new GObject.Class({
         }));
     },
 
+    setCurrentSensor: function(id){
+        this.Settings.set_string("current-sensor", id)
+        this.currentSensor.set_text(id)
+    },
+
     getDistanceFromLatLonInKm: function(lat1,lon1,lat2,lon2) {
         //var R = 6371; // Radius of the earth in km
         var R = 3958.756; // Radius of the earth in mi
@@ -150,6 +164,7 @@ const AirQualityPrefsWidget = new GObject.Class({
                 let iter = this.liststore.append();
                 this.liststore.set_value(iter, 0, results[i].Label);
                 this.liststore.set_value(iter, 1, results[i].distance);
+                this.liststore.set_value(iter, 2, results[i].ID)
             }
         }));
     },

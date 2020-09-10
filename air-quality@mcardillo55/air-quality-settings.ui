@@ -12,6 +12,8 @@
       <column type="gchararray"/>
       <!-- column-name distance -->
       <column type="gfloat"/>
+      <!-- column-name id -->
+      <column type="gint"/>
     </columns>
   </object>
   <object class="GtkBox" id="prefs-widget">
