@@ -135,7 +135,7 @@ const AirQualityPrefsWidget = new GObject.Class({
 
             for (var idx in results) {
                 let item = results[idx]
-                if (item.DEVICE_LOCATIONTYPE == "outside") {
+                if (item.DEVICE_LOCATIONTYPE && item.DEVICE_LOCATIONTYPE == "outside") {
                     let distance = this.getDistanceFromLatLonInKm(parseFloat(lat), parseFloat(lon), item.Lat, item.Lon);
                     item.distance = distance;
                 } else {
