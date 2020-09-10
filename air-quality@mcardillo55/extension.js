@@ -66,6 +66,9 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
 
     loadConfig() {
         this.Settings = ExtensionUtils.getSettings(AIRQUALITY_SETTINGS_SCHEMA);
+        this.Settings.connect("changed", Lang.bind(this, function() {
+            this.refresh_aqi();
+        }))
     }
 
     refresh_aqi() {
