@@ -117,6 +117,26 @@ const AirQualityPrefsWidget = new GObject.Class({
                 this.showSearchMenu();
             }));
         }));
+
+        let closest_sensors = this.Settings.get_strv("closest-sensors")
+        if (closest_sensors) {
+            let selected_row;
+            for (var i in closest_sensors) {
+                let split_data = closest_sensors[i].split('>')
+
+                let iter = this.liststore.append();
+                this.liststore.set_value(iter, 0, split_data[0]);
+                this.liststore.set_value(iter, 1, parseFloat(split_data[1]));
+                this.liststore.set_value(iter, 2, parseInt(split_data[2]));
+
+                if (split_data[2] == this.Settings.get_string("current-sensor")) {
+                    selected_row = this.liststore.get_path(iter)
+                }
+            }
+            if (selected_row) {
+                this.treeview.set_cursor(selected_row, null, false)
+            }
+        }
     },
 
     setCurrentSensor: function(id){
@@ -160,12 +180,16 @@ const AirQualityPrefsWidget = new GObject.Class({
             results.sort((a, b) => (a.distance > b.distance) ? 1 : -1)
 
             this.liststore.clear()
+            
+            let sensors_list_for_settings = []
             for (var i=0; i<20; i++) {
                 let iter = this.liststore.append();
                 this.liststore.set_value(iter, 0, results[i].Label);
                 this.liststore.set_value(iter, 1, results[i].distance);
                 this.liststore.set_value(iter, 2, results[i].ID)
+                sensors_list_for_settings.push(results[i].Label+">"+results[i].distance+">"+results[i].ID)
             }
+            this.Settings.set_strv("closest-sensors", sensors_list_for_settings)
         }));
     },
 

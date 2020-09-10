@@ -5,5 +5,10 @@
       <summary>Current Sensor ID</summary>
       <description/>
     </key>
+    <key type="as" name="closest-sensors">
+      <default>[]</default>
+      <summary>String array of the closest sensors</summary>
+      <description/>
+    </key>
   </schema>
 </schemalist>
