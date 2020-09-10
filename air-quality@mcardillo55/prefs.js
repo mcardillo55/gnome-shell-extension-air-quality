@@ -14,6 +14,7 @@ const Lang = imports.lang;
 const EXTENSIONDIR = Me.dir.get_path();
 const AIRQUALITY_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.airquality';
 const OPENWEATHER_URL_OSM = 'https://nominatim.openstreetmap.org/search';
+const PURPLEAIR_URL = "https://www.purpleair.com/json"
 
 let _httpSession;
 
@@ -41,6 +42,16 @@ const AirQualityPrefsWidget = new GObject.Class({
         this.currentSensor = this.Window.get_object("current-sensor")
         this.searchLocation = this.Window.get_object("search-location")
         this.searchMenu = this.Window.get_object("search-menu")
+        this.treeview = this.Window.get_object("tree-treeview")
+        this.liststore = this.Window.get_object("tree-liststore")
+
+        let column = new Gtk.TreeViewColumn();
+        column.set_title("Location");
+        this.treeview.append_column(column);
+
+        let renderer = new Gtk.CellRendererText();
+        column.pack_start(renderer, null);
+        column.add_attribute(renderer, "text", 0);
 
         this.currentSensor.connect("activate", Lang.bind(this, function() {
             this.Settings.set_string("current-sensor", this.currentSensor.get_text())
@@ -82,13 +93,55 @@ const AirQualityPrefsWidget = new GObject.Class({
                             let item = new Gtk.MenuItem({
                                 label: cityText + " " + cityCoord
                             });
-                            //item.connect("activate", Lang.bind(this, this.onActivateItem));
+                            item.connect("activate", Lang.bind(this, this.onActivateItem));
                             this.searchMenu.append(item);
                         }
                     }
                 }
                 this.showSearchMenu();
             }));
+        }));
+    },
+
+    getDistanceFromLatLonInKm: function(lat1,lon1,lat2,lon2) {
+        var R = 6371; // Radius of the earth in km
+        var dLat = (lat2-lat1) * (Math.PI/180);  // deg2rad below
+        var dLon = (lon2-lon1) * (Math.PI/180); 
+        var a = 
+          Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos(lat1 * (Math.PI/180)) * Math.cos(lat2 * (Math.PI/180)) * 
+          Math.sin(dLon/2) * Math.sin(dLon/2)
+          ; 
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        var d = R * c; // Distance in km
+        return d;
+    },
+
+    onActivateItem: function() {
+        let coords = arguments[0].get_label().split(/\[/)[1].split(/\]/)[0]
+        let lat = coords.split(",")[0]
+        let lon = coords.split(",")[1].trim()
+
+        this.load_json_async(PURPLEAIR_URL, {}, Lang.bind(this, function() {
+            let results = arguments[0].results
+
+            for (var idx in results) {
+                let item = results[idx]
+                if (item.DEVICE_LOCATIONTYPE == "outside") {
+                    let distance = this.getDistanceFromLatLonInKm(parseFloat(lat), parseFloat(lon), item.Lat, item.Lon);
+                    item.distance = distance;
+                } else {
+                    delete results[idx]
+                }
+            }
+
+            results.sort((a, b) => (a.distance > b.distance) ? 1 : -1)
+
+            this.liststore.clear()
+            for (var i=0; i<20; i++) {
+                let iter = this.liststore.append();
+                this.liststore.set_value(iter, 0, results[i].Label);
+            }
         }));
     },
 

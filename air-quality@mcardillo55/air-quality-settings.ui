@@ -8,7 +8,7 @@
   </object>
   <object class="GtkListStore" id="tree-liststore">
     <columns>
-      <!-- column-name Location -->
+      <!-- column-name location -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -119,8 +119,12 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="model">tree-liststore</property>
+            <property name="reorderable">True</property>
+            <property name="show_expanders">False</property>
+            <property name="level_indentation">12</property>
+            <property name="tooltip_column">1</property>
             <child internal-child="selection">
-              <object class="GtkTreeSelection"/>
+              <object class="GtkTreeSelection" id="treeview-selection"/>
             </child>
           </object>
         </child>
