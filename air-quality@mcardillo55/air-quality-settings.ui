@@ -10,6 +10,8 @@
     <columns>
       <!-- column-name location -->
       <column type="gchararray"/>
+      <!-- column-name distance -->
+      <column type="gfloat"/>
     </columns>
   </object>
   <object class="GtkBox" id="prefs-widget">

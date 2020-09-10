@@ -53,6 +53,13 @@ const AirQualityPrefsWidget = new GObject.Class({
         column.pack_start(renderer, null);
         column.add_attribute(renderer, "text", 0);
 
+        column = new Gtk.TreeViewColumn();
+        column.set_title("Distance (mi)");
+        this.treeview.append_column(column);
+
+        column.pack_start(renderer, null);
+        column.add_attribute(renderer, "text", 1);
+
         this.currentSensor.connect("activate", Lang.bind(this, function() {
             this.Settings.set_string("current-sensor", this.currentSensor.get_text())
         }));
@@ -104,7 +111,8 @@ const AirQualityPrefsWidget = new GObject.Class({
     },
 
     getDistanceFromLatLonInKm: function(lat1,lon1,lat2,lon2) {
-        var R = 6371; // Radius of the earth in km
+        //var R = 6371; // Radius of the earth in km
+        var R = 3958.756; // Radius of the earth in mi
         var dLat = (lat2-lat1) * (Math.PI/180);  // deg2rad below
         var dLon = (lon2-lon1) * (Math.PI/180); 
         var a = 
@@ -141,6 +149,7 @@ const AirQualityPrefsWidget = new GObject.Class({
             for (var i=0; i<20; i++) {
                 let iter = this.liststore.append();
                 this.liststore.set_value(iter, 0, results[i].Label);
+                this.liststore.set_value(iter, 1, results[i].distance);
             }
         }));
     },
