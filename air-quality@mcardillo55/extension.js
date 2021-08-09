@@ -31,6 +31,7 @@ const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 
 const Config = imports.misc.config;
+const SHELL_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
 const SHELL_MINOR = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
 
 const AIRQUALITY_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.airquality';
@@ -176,11 +177,11 @@ var AQIIndicator = class AQIIndicator extends PanelMenu.Button {
     }
 }
 
-if (SHELL_MINOR > 30) {
+if (SHELL_MAJOR >= 40 || (SHELL_MAJOR < 40 && SHELL_MINOR > 30)) {
     AQIIndicator = GObject.registerClass(
-        {GTypeName: 'AQIIndicator'},
-        AQIIndicator
-    )
+        {
+            GTypeName: 'AQIIndicator'
+        }, AQIIndicator);
 }
 
 class Extension {

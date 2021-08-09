@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.36.0 -->
+<!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
-  <object class="GtkMenu" id="search-menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
+  <object class="GtkPopoverMenu" id="search-menu">
+    <property name="can-focus">True</property>
+    <child>
+      <placeholder/>
+    </child>
   </object>
   <object class="GtkListStore" id="tree-liststore">
     <columns>
@@ -18,126 +20,85 @@
   </object>
   <object class="GtkBox" id="prefs-widget">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
+    <property name="can-focus">True</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkLabel" id="current-sensor-label">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="halign">start</property>
         <property name="label" translatable="yes">Current Sensor ID:</property>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">0</property>
-      </packing>
     </child>
     <child>
       <object class="GtkEntry" id="current-sensor">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="secondary_icon_name">edit-clear-symbolic</property>
+        <property name="can-focus">True</property>
+        <property name="secondary-icon-name">edit-clear-symbolic</property>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
     </child>
     <child>
       <object class="GtkLabel" id="search-label">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="halign">start</property>
         <property name="hexpand">False</property>
         <property name="label" translatable="yes">Search for closest sensors:</property>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">2</property>
-      </packing>
     </child>
     <child>
       <object class="GtkBox" id="search-combo-box">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">True</property>
         <child>
-          <object class="GtkEntry" id="search-location">
+          <object class="GtkEntry" id="search-location-entry">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can-focus">True</property>
             <property name="hexpand">True</property>
-            <property name="placeholder_text" translatable="yes">Search for address (e.g. City, State, Zip, Coordinates)</property>
+            <property name="placeholder-text" translatable="yes">Search for address (e.g. City, State, Zip, Coordinates)</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
           <object class="GtkButton" id="search-button">
             <property name="label" translatable="yes">Search</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
         </child>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">3</property>
-      </packing>
     </child>
     <child>
       <object class="GtkSeparator" id="separator1">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_left">5</property>
-        <property name="margin_start">5</property>
-        <property name="margin_top">5</property>
-        <property name="margin_bottom">5</property>
+        <property name="can-focus">False</property>
+        <property name="margin-start">5</property>
+        <property name="margin-end">5</property>
+        <property name="margin-top">5</property>
+        <property name="margin-bottom">5</property>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">4</property>
-      </packing>
     </child>
     <child>
       <object class="GtkScrolledWindow" id="tree-scrolledwindow">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="shadow_type">in</property>
-        <property name="min_content_width">300</property>
-        <property name="min_content_height">250</property>
+        <property name="can-focus">True</property>
+        <property name="min-content-width">300</property>
+        <property name="min-content-height">250</property>
         <child>
           <object class="GtkTreeView" id="tree-treeview">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can-focus">True</property>
             <property name="model">tree-liststore</property>
             <property name="reorderable">True</property>
-            <property name="show_expanders">False</property>
-            <property name="level_indentation">12</property>
-            <property name="tooltip_column">1</property>
+            <property name="show-expanders">False</property>
+            <property name="level-indentation">12</property>
+            <property name="tooltip-column">1</property>
             <child internal-child="selection">
               <object class="GtkTreeSelection" id="treeview-selection"/>
             </child>
           </object>
         </child>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">5</property>
-      </packing>
     </child>
   </object>
 </interface>

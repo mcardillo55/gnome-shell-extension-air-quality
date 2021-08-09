@@ -255,6 +255,5 @@ function init() {
 function buildPrefsWidget() {
     let prefs = new AirQualityPrefsWidget();
     let widget = prefs.mainWidget;
-    widget.show_all();
     return widget;
 }

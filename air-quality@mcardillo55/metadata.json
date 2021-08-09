@@ -1,8 +1,9 @@
 {
   "name": "Air Quality",
   "description": "View local air quality in the top bar",
+  "url": "https://github.com/mcardillo55/gnome-shell-extension-air-quality", 
   "uuid": "air-quality@mcardillo55",
   "shell-version": [
-    "3.36"
+    "3.36", "40"
   ]
 }
