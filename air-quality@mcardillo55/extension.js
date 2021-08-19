@@ -192,6 +192,7 @@ class Extension {
     enable() {
         log(`enabling ${Me.metadata.name} version ${Me.metadata.version}`);
         this.indicator = new AQIIndicator();
+        this.indicator.refresh_aqi();
         Main.panel.addToStatusArea(`${Me.metadata.name} Indicator`, this.indicator);
     }
 
