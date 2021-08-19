@@ -7,7 +7,7 @@ An extension to display the air quality index (AQI) from local Purple Air sensor
 
 ### From extensions.gnome.org
 
-Submitted and pending approval
+https://extensions.gnome.org/extension/3574/air-quality/
 
 ### From git
 
