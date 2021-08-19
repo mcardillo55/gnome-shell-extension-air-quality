@@ -1,9 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
 <interface>
-  <requires lib="gtk+" version="3.22"/>
-  <object class="GtkPopoverMenu" id="search-menu">
-    <property name="can-focus">True</property>
+  <requires lib="gtk+" version="4.0"/>
+  <object class="GtkWindow" id="search-menu-widget">
+    <property name="modal">1</property>
+    <child>
+      <object class="GtkBox" id="search-menu">
+        <property name="orientation">vertical</property>
+        <property name="width_request">500</property>
+        <property name="height_request">300</property>
+        <child>
+          <object class="GtkScrolledWindow" id="search-scrolledwindow">
+            <property name="vexpand">1</property>
+            <property name="min_content_width">300</property>
+            <property name="min_content_height">250</property>
+            <property name="child">
+              <object class="GtkTreeView" id="search-treeview">
+                <property name="model">search-liststore</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="search-selection"/>
+                </child>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="search-liststore">
+    <columns>
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">dummy</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkWindow" id="search-widget">
+    <property name="modal">1</property>
+    <property name="destroy_with_parent">1</property>
     <child>
       <placeholder/>
     </child>

@@ -13,7 +13,7 @@ const Lang = imports.lang;
 
 const EXTENSIONDIR = Me.dir.get_path();
 const AIRQUALITY_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.airquality';
-const OPENWEATHER_URL_OSM = 'https://nominatim.openstreetmap.org/search';
+const OPENSTREETMAP_URL = 'https://nominatim.openstreetmap.org/search';
 const PURPLEAIR_URL = "https://www.purpleair.com/json"
 
 let _httpSession;
@@ -27,8 +27,6 @@ const AirQualityPrefsWidget = new GObject.Class({
         this.parent(params);
 
         this.initWindow();
-
-        //this.refreshUI();
     },
 
     Window: new Gtk.Builder(),
@@ -40,10 +38,18 @@ const AirQualityPrefsWidget = new GObject.Class({
 
         this.mainWidget = this.Window.get_object("prefs-widget")
         this.currentSensor = this.Window.get_object("current-sensor")
-        this.searchLocation = this.Window.get_object("search-location")
+        this.searchLocation = this.Window.get_object("search-location-entry")
         this.searchMenu = this.Window.get_object("search-menu")
+        this.searchMenuWidget = this.Window.get_object("search-menu-widget");
+        this.searchTreeview = this.Window.get_object("search-treeview");
+        this.searchListstore = this.Window.get_object("search-liststore");
         this.treeview = this.Window.get_object("tree-treeview")
         this.liststore = this.Window.get_object("tree-liststore")
+
+        this.searchSelection = this.Window.get_object("search-selection");
+        this.searchSelection.connect("changed", Lang.bind(this, function(selection) {
+            this.searchSelectionChanged(selection);
+        }));
 
         let column = new Gtk.TreeViewColumn();
         column.set_title("Location");
@@ -59,6 +65,14 @@ const AirQualityPrefsWidget = new GObject.Class({
 
         column.pack_start(renderer, null);
         column.add_attribute(renderer, "text", 1);
+
+        column = new Gtk.TreeViewColumn();
+        column.set_title("Result");
+        this.searchTreeview.append_column(column);
+
+        renderer = new Gtk.CellRendererText();
+        column.pack_start(renderer, null);
+        column.add_attribute(renderer, "text", 0);
 
         this.currentSensor.connect("activate", Lang.bind(this, function() {
             this.setCurrentSensor(this.currentSensor.get_text())
@@ -76,46 +90,9 @@ const AirQualityPrefsWidget = new GObject.Class({
 
         }))
 
-        this.Window.get_object("search-button").connect("clicked", Lang.bind(this, function() {
-            this.clearSearchMenu();
-            
-            let params = {
-                format: 'json',
-                addressdetails: '1',
-                q: this.searchLocation.get_text()
-            };
-            this.load_json_async(OPENWEATHER_URL_OSM, params, Lang.bind(this, function() {
-                if (!arguments[0]) {
-                    let item = new Gtk.MenuItem({
-                        label: _("Invalid data when searching for \"%s\"").format(location)
-                    });
-                    this.searchMenu.append(item);
-                } else {
-                    let newCity = arguments[0];
+        this.searchLocation.connect("activate", Lang.bind(this, this.findClosestSensors));
 
-                    if (Number(newCity.length) < 1) {
-                        let item = new Gtk.MenuItem({
-                            label: _("\"%s\" not found").format(location)
-                        });
-                        this.searchMenu.append(item);
-                    } else {
-                        var m = {};
-                        for (var i in newCity) {
-
-                            let cityText = newCity[i].display_name;
-                            let cityCoord = "[" + newCity[i].lat + "," + newCity[i].lon + "]";
-
-                            let item = new Gtk.MenuItem({
-                                label: cityText + " " + cityCoord
-                            });
-                            item.connect("activate", Lang.bind(this, this.onActivateItem));
-                            this.searchMenu.append(item);
-                        }
-                    }
-                }
-                this.showSearchMenu();
-            }));
-        }));
+        this.Window.get_object("search-button").connect("clicked", Lang.bind(this, this.findClosestSensors));
 
         let closest_sensors = this.Settings.get_strv("closest-sensors")
         if (closest_sensors) {
@@ -138,6 +115,87 @@ const AirQualityPrefsWidget = new GObject.Class({
         }
     },
 
+    findClosestSensors: function() {
+        this.clearSearchMenu();
+        
+        let location = this.searchLocation.get_text().trim();
+        if (location === "")
+            return 0;
+
+        let params = {
+            format: 'json',
+            addressdetails: '1',
+            q: location
+        };
+        this.load_json_async(OPENSTREETMAP_URL, params, Lang.bind(this, function() {
+            this.clearSearchMenu();
+            if (!arguments[0]) {
+                this.appendToSearchList(("Invalid data when searching for \"%s\"").format(location));
+            } else {
+                let newCity = arguments[0];
+
+                if (Number(newCity.length) < 1) {
+                    this.appendToSearchList(("\"%s\" not found").format(location));
+                } else {
+                    var m = {};
+                    for (var i in newCity) {
+                        let cityText = newCity[i].display_name;
+                        let cityCoord = "[" + newCity[i].lat + "," + newCity[i].lon + "]";
+                        this.appendToSearchList(cityText + " " + cityCoord);
+                    }
+                }
+            }
+            this.showSearchMenu();
+            return 0;
+        }));
+    },
+
+    searchSelectionChanged: function(select) {
+        let a = select.get_selected_rows()[0][0];
+        if ( a !== undefined ) {
+            let b = this.searchListstore.get_iter(a);
+            let selectionText = this.searchListstore.get_value(b[1], 0).toString();
+            this.searchLocation.set_text(selectionText);
+
+            let coords = selectionText.split(/\[/)[1].split(/\]/)[0]
+            let lat = coords.split(",")[0]
+            let lon = coords.split(",")[1].trim()
+
+            this.liststore.clear()
+            let iter = this.liststore.append();
+            this.liststore.set_value(iter, 0, "Loading closest sensors...");
+
+            this.load_json_async(PURPLEAIR_URL, {"lat": lat, "lon": lon}, Lang.bind(this, function() {
+                let results = arguments[0].results
+    
+                for (var idx in results) {
+                    let item = results[idx]
+                    if (item.DEVICE_LOCATIONTYPE && item.DEVICE_LOCATIONTYPE == "outside") {
+                        let distance = this.getDistanceFromLatLonInKm(parseFloat(lat), parseFloat(lon), item.Lat, item.Lon);
+                        item.distance = distance;
+                    } else {
+                        delete results[idx]
+                    }
+                }
+    
+                results.sort((a, b) => (a.distance > b.distance) ? 1 : -1)
+    
+                this.liststore.clear()
+                
+                let sensors_list_for_settings = []
+                for (var i=0; i<20; i++) {
+                    let iter = this.liststore.append();
+                    this.liststore.set_value(iter, 0, results[i].Label);
+                    this.liststore.set_value(iter, 1, results[i].distance);
+                    this.liststore.set_value(iter, 2, results[i].ID)
+                    sensors_list_for_settings.push(results[i].Label+">"+results[i].distance+">"+results[i].ID)
+                }
+                this.Settings.set_strv("closest-sensors", sensors_list_for_settings)
+            }));
+        }
+        this.clearSearchMenu();
+    },
+
     setCurrentSensor: function(id){
         this.Settings.set_string("current-sensor", id)
         this.currentSensor.set_text(id)
@@ -156,40 +214,6 @@ const AirQualityPrefsWidget = new GObject.Class({
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         var d = R * c; // Distance in km
         return d;
-    },
-
-    onActivateItem: function() {
-        let coords = arguments[0].get_label().split(/\[/)[1].split(/\]/)[0]
-        let lat = coords.split(",")[0]
-        let lon = coords.split(",")[1].trim()
-
-        this.load_json_async(PURPLEAIR_URL, {}, Lang.bind(this, function() {
-            let results = arguments[0].results
-
-            for (var idx in results) {
-                let item = results[idx]
-                if (item.DEVICE_LOCATIONTYPE && item.DEVICE_LOCATIONTYPE == "outside") {
-                    let distance = this.getDistanceFromLatLonInKm(parseFloat(lat), parseFloat(lon), item.Lat, item.Lon);
-                    item.distance = distance;
-                } else {
-                    delete results[idx]
-                }
-            }
-
-            results.sort((a, b) => (a.distance > b.distance) ? 1 : -1)
-
-            this.liststore.clear()
-            
-            let sensors_list_for_settings = []
-            for (var i=0; i<20; i++) {
-                let iter = this.liststore.append();
-                this.liststore.set_value(iter, 0, results[i].Label);
-                this.liststore.set_value(iter, 1, results[i].distance);
-                this.liststore.set_value(iter, 2, results[i].ID)
-                sensors_list_for_settings.push(results[i].Label+">"+results[i].distance+">"+results[i].ID)
-            }
-            this.Settings.set_strv("closest-sensors", sensors_list_for_settings)
-        }));
     },
 
     loadConfig: function() {
@@ -223,29 +247,27 @@ const AirQualityPrefsWidget = new GObject.Class({
         return;
     },
 
+    appendToSearchList: function(text) {
+        let current = this.searchListstore.get_iter_first();
+
+        current = this.searchListstore.append();
+        this.searchListstore.set_value(current, 0, text);
+    },
+
     clearSearchMenu: function() {
-        let children = this.searchMenu.get_children();
-        for (let i in children) {
-            this.searchMenu.remove(children[i]);
-        }
+        this.searchSelection.unselect_all();
+        this.searchSelection.set_mode(Gtk.SelectionMode.NONE);
+        if (this.searchListstore !== undefined)
+            this.searchListstore.clear();
+        this.searchMenuWidget.hide();
     },
 
     showSearchMenu: function() {
-        this.searchMenu.show_all();
-        if (typeof this.searchMenu.popup_at_widget === "function") {
-            this.searchMenu.popup_at_widget(this.searchLocation, Gdk.Gravity.SOUTH_WEST, Gdk.Gravity.NORTH_WEST, null);
-        }
-        else
-        {
-            this.searchMenu.popup(null, null, Lang.bind(this, this.placeSearchMenu), 0, this.searchLocation);
-        }
+        this.searchSelection.unselect_all();
+        this.searchMenuWidget.set_title("Choose location...")
+        this.searchMenuWidget.show();
+        this.searchSelection.set_mode(Gtk.SelectionMode.SINGLE);
     },
-
-    placeSearchMenu: function() {
-        let[gx, gy, gw, gh] = this.searchName.get_window().get_geometry();
-        let[px, py] = this.searchName.get_window().get_position();
-        return [gx + px, gy + py + this.searchName.get_allocated_height()];
-    }
 });
 
 function init() {
